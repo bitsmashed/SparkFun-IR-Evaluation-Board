@@ -12,7 +12,7 @@
 	High Fuse D9
     Low Fuse E2
 	
-	Baud = 38400bps
+	Prints temperature in Farenhight at 38400bps
 */
 
 #include <stdlib.h>
@@ -52,9 +52,9 @@ static int uart_putchar(char c, FILE *stream);
 void put_char(unsigned char byte);
 static FILE mystdout = FDEV_SETUP_STREAM(uart_putchar, NULL, _FDEV_SETUP_WRITE);
 void delay_ms(uint16_t x);
-
-long Tfr; 
-int16_t Tf;
+ 
+double Tf;
+uint16_t Toreg;
 
 /////===================================////////////////////
 
@@ -62,15 +62,15 @@ int main(void)
 {
 	ioinit();
 	i2cInit();
-	delay_ms(100);
+	delay_ms(1000);
 	
 	while(1)
 	{
 		cbi(PORTB, 0);
 		delay_ms(400); 
 		MLX();
-		printf("%d.", Tf);
-		printf("%lu\n", Tfr);
+		//printf("%d - ", Toreg);
+		printf("%.2f F\n", Tf);
 		sbi(PORTB, 0);
 		delay_ms(400); 
 	}
@@ -78,8 +78,7 @@ int main(void)
 
 void MLX(void)
 {		
-	long xh, xl;
-	uint16_t Toreg;
+	int xh, xl;
 	
 	i2cSendStart();
 	i2cWaitForComplete();
@@ -112,9 +111,8 @@ void MLX(void)
 		printf("error\n"); 
 	}
 	
-	//Tk = Toreg / 200;
-	Tf = ((256* xh + xl)*18/5 - 45967)/100;
-	Tfr = ((256* xh + xl)*18/5 - 45967)%100;
+	//Tk = Toreg / 200; //temp Kelvin
+	Tf = (((long)Toreg * (3.6)) - 45967)/100; //temp F
 }
 
 /*********************
