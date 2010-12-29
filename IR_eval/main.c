@@ -70,7 +70,7 @@ int main(void)
 		delay_ms(400); 
 		MLX();
 		//printf("%d - ", Toreg);
-		printf("%.2f F\n", Tf);
+		printf("%.2fF\n", Tf);
 		sbi(PORTB, 0);
 		delay_ms(400); 
 	}
@@ -80,17 +80,19 @@ void MLX(void)
 {		
 	int xh, xl;
 	
+	//Slave Address (SA) can be 0x00 for any MLX90614
+	//using Read Word: SA(write) - Command - SA(read) - LSByte - MSByte - PEC
 	i2cSendStart();
 	i2cWaitForComplete();
-	i2cSendByte(0x00);    //read from slave
+	i2cSendByte(0x00);    //SA + write to slave
 	i2cWaitForComplete();
-	i2cSendByte(0x07);    //object temperature 1
+	i2cSendByte(0x07);    //RAM address 0x07, object temperature 1
 	i2cWaitForComplete();
 	i2cSendStop();
 	
 	i2cSendStart();
 	i2cWaitForComplete();
-	i2cSendByte(0x01);   //write to slave     
+	i2cSendByte(0x01);   //SA + read from slave     
 	i2cWaitForComplete();
 	i2cReceiveByte(TRUE);
 	i2cWaitForComplete();
